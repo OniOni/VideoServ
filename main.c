@@ -107,29 +107,11 @@ int main(int argc, char ** argv)
 	}
       } 
       else{
-	/*char buffer[5] = {'\0'};
-	char full[10] = {'\0'};
-	int read = 0;
-
-	while (read < 3){
-	  read += recv(events[n].data.fd, buffer, 4, 0);
-	  strcat(full, buffer);
-	  printf("Read : %d\tfull : '%s'\n", read, full); 
-	}
-	full[3] = '\0';
-	
-	recv(events[n].data.fd, buffer, 3, 0);
-
-	puts(full);
-	if (strcmp(full, "GET") == 0)
-	printf("Epoll event %d\n", events[n].events);*/
 	if (events[n].events == 1)
 	  send_get_answer(events[n].data.fd);
       }
     }
   }
-
-  printf("End : %s\n", strerror(errno));
   
   return 0;
 }
