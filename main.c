@@ -9,7 +9,7 @@
 
 #define MAX_EVENTS 10
 
-char * file_to_buffer(int * size)
+void file_to_buffer(char ** buff, int * size)
 {
   FILE * f = fopen("catalogue.txt", "r");
   printf("fopen : %s\n", strerror(errno));
@@ -21,24 +21,24 @@ char * file_to_buffer(int * size)
   printf("fopen : %s\n", strerror(errno));
   int c;
   int i;
-  char * buff = malloc(*size * sizeof(char));
+  *buff = malloc(*size * sizeof(char));
 
   fseek(f, 0, SEEK_SET);
   printf("fseek : %s\n", strerror(errno));
   for(i = 0; i < *size; i++)
   {
     c = fgetc(f);
-    buff[i] = c;
+    (*buff)[i] = c;
   }
 
-  return buff;
 }
 
 void send_get_answer(int fd)
 {
   int size;
-  char * buf = file_to_buffer(&size);
-  puts("Going to send");  
+  char * buf = NULL;
+  file_to_buffer(&buf, &size);
+  puts("Going to send");
   send(fd, buf, size, 0);
   printf("send : %s\n", strerror(errno));
 }
