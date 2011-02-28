@@ -8,6 +8,30 @@
 #include <sys/epoll.h>
 
 #define MAX_EVENTS 10
+#define MAX_HEADER 200
+
+char * build_date()
+{
+  return "00 / 00 / 00";
+}
+
+char * build_http_header(char * type, int size)
+{
+  char * header = malloc(MAX_HEADER * sizeof(char));
+  memset(header, '\0', MAX_HEADER);
+  strcat(header, "HTTP/1.1 200 OK\nDate: ");
+  strcat(header, build_date());
+  strcat(header, "Server: ServLib (Unix) (Ubuntu/Linux)\nAccept-Ranges: bytes\n\
+Content-Length: ");
+  char tmp[32] = {'\0'};
+  sprintf(tmp, "%d", size);
+  strcat(header, tmp);
+  strcat(header, " Connection: close\nContent-Type: ");
+  strcat(header, type);
+  strcat(header, "; charset=UTF-8\n\n");
+
+  return header;
+}
 
 void file_to_buffer(char ** buff, int * size)
 {
@@ -38,7 +62,10 @@ void send_get_answer(int fd)
   int size;
   char * buf = NULL;
   file_to_buffer(&buf, &size);
+  char * header = build_http_header("text/plain", size);
   puts("Going to send");
+  send(fd, header, strlen(header), 0);
+  printf("send : %s\n", strerror(errno));
   send(fd, buf, size, 0);
   printf("send : %s\n", strerror(errno));
 }
@@ -107,6 +134,7 @@ int main(int argc, char ** argv)
 	}
       } 
       else{
+	printf("%d\n", events[n].events == 1);
 	if (events[n].events == 1)
 	  send_get_answer(events[n].data.fd);
       }
