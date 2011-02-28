@@ -64,7 +64,7 @@ void send_get_answer(int fd)
   file_to_buffer(&buf, &size);
   char * header = build_http_header("text/plain", size);
   puts("Going to send");
-  send(fd, header, strlen(header), 0);
+  send(fd, header, strlen(header), MSG_MORE);
   printf("send : %s\n", strerror(errno));
   send(fd, buf, size, 0);
   printf("send : %s\n", strerror(errno));
