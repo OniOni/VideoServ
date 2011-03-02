@@ -21,12 +21,12 @@ char * build_http_header(char * type, int size)
   memset(header, '\0', MAX_HEADER);
   strcat(header, "HTTP/1.1 200 OK\nDate: ");
   strcat(header, build_date());
-  strcat(header, "Server: ServLib (Unix) (Ubuntu/Linux)\nAccept-Ranges: bytes\n\
+  strcat(header, "\nServer: ServLib (Unix) (Ubuntu/Linux)\nAccept-Ranges: bytes\n\
 Content-Length: ");
   char tmp[32] = {'\0'};
   sprintf(tmp, "%d", size);
   strcat(header, tmp);
-  strcat(header, " Connection: close\nContent-Type: ");
+  strcat(header, "\nConnection: close\nContent-Type: ");
   strcat(header, type);
   strcat(header, "; charset=UTF-8\n\n");
 
