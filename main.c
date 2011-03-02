@@ -98,8 +98,7 @@ void send_get_answer(int fd)
   free(buf);
 }
 
-
-int main(int argc, char ** argv)
+void central(int port)
 {
   struct epoll_event ev, events[MAX_EVENTS];
   int nfds, epollfd;
@@ -111,7 +110,7 @@ int main(int argc, char ** argv)
  
   saddr.sin_addr.s_addr = htonl(INADDR_ANY);
   saddr.sin_family = AF_INET;
-  saddr.sin_port = htons(8082);
+  saddr.sin_port = htons(port);
 
   bind(sock, (struct sockaddr *)&saddr, sizeof(saddr));
   printf("bind : %s\n", strerror(errno));
@@ -168,6 +167,14 @@ int main(int argc, char ** argv)
       }
     }
   }
-  
+}  
+
+int main(int argc, char ** argv)
+{
+  pid_t p_central = fork();
+  if (p_central == 0)
+    central(8082);
+    
+  wait(-1);
   return 0;
 }
