@@ -40,7 +40,7 @@ void file_to_buffer(char ** buff, int * size)
 
   fseek(f, 0,SEEK_END);
   printf("fseek : %s\n", strerror(errno));
-  
+
   *size = ftell(f);
   printf("fopen : %s\n", strerror(errno));
   int c;
@@ -55,6 +55,7 @@ void file_to_buffer(char ** buff, int * size)
     (*buff)[i] = c;
   }
 
+  fclose(f);
 }
 
 void send_get_answer(int fd)
@@ -68,6 +69,8 @@ void send_get_answer(int fd)
   printf("send : %s\n", strerror(errno));
   send(fd, buf, size, 0);
   printf("send : %s\n", strerror(errno));
+  free(header);
+  free(buf);
 }
 
 
