@@ -20,14 +20,23 @@ char * build_http_header(char * type, int size)
   char * header = malloc(MAX_HEADER * sizeof(char));
   memset(header, '\0', MAX_HEADER);
   strcat(header, "HTTP/1.1 200 OK\nDate: ");
+  
+  /*Insertion de la date actuelle*/
   strcat(header, build_date());
+
   strcat(header, "\nServer: ServLib (Unix) (Ubuntu/Linux)\nAccept-Ranges: bytes\n\
 Content-Length: ");
+
+  /*Insertion de la taille*/
   char tmp[32] = {'\0'};
   sprintf(tmp, "%d", size);
   strcat(header, tmp);
+
   strcat(header, "\nConnection: close\nContent-Type: ");
+
+  /*Insertion du type*/
   strcat(header, type);
+
   strcat(header, "; charset=UTF-8\n\n");
 
   return header;
@@ -35,26 +44,35 @@ Content-Length: ");
 
 void file_to_buffer(char ** buff, int * size)
 {
+  /*Ouverture du fichier*/
   FILE * f = fopen("catalogue.txt", "r");
   printf("fopen : %s\n", strerror(errno));
 
+  /*Deplacement du curseur à la fin du fichier*/
   fseek(f, 0,SEEK_END);
   printf("fseek : %s\n", strerror(errno));
 
+  /*On recupere le nombre de caractere*/
   *size = ftell(f);
   printf("fopen : %s\n", strerror(errno));
+
   int c;
   int i;
+  /*On alloue un espace memoire de la taille du fichier*/
   *buff = malloc(*size * sizeof(char));
 
+  /*On se replace au debut du fichier*/
   fseek(f, 0, SEEK_SET);
   printf("fseek : %s\n", strerror(errno));
+
+  /*On recupere tout les caracteres*/
   for(i = 0; i < *size; i++)
   {
     c = fgetc(f);
     (*buff)[i] = c;
   }
 
+  /*Et on referme le fichier*/
   fclose(f);
 }
 
@@ -62,13 +80,19 @@ void send_get_answer(int fd)
 {
   int size;
   char * buf = NULL;
+  /*On recuper le fichier sous forme de chaine de cara*/
   file_to_buffer(&buf, &size);
+  /*On construit l'entete HTML aproprié*/
   char * header = build_http_header("text/plain", size);
+
+  /*Et on envoie les données*/
   puts("Going to send");
   send(fd, header, strlen(header), MSG_MORE);
   printf("send : %s\n", strerror(errno));
   send(fd, buf, size, 0);
   printf("send : %s\n", strerror(errno));
+
+  /*On libere les ressources alloué*/
   free(header);
   free(buf);
 }
