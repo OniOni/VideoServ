@@ -9,6 +9,7 @@
 
 #define MAX_EVENTS 10
 #define MAX_HEADER 200
+#define MAX_STR 32
 
 char * build_date()
 {
@@ -28,7 +29,7 @@ char * build_http_header(char * type, int size)
 Content-Length: ");
 
   /*Insertion de la taille*/
-  char tmp[32] = {'\0'};
+  char tmp[MAX_STR] = {'\0'};
   sprintf(tmp, "%d", size);
   strcat(header, tmp);
 
