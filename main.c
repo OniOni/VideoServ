@@ -98,15 +98,12 @@ void send_get_answer(int fd)
   free(buf);
 }
 
-void central(int port)
+int mk_sock(int port)
 {
-  struct epoll_event ev, events[MAX_EVENTS];
-  int nfds, epollfd;
-  
   int sock = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
   printf("socket : %s\n", strerror(errno));
   
-  struct sockaddr_in saddr, saddr_client;;
+  struct sockaddr_in saddr, saddr_client;
  
   saddr.sin_addr.s_addr = htonl(INADDR_ANY);
   saddr.sin_family = AF_INET;
@@ -117,6 +114,17 @@ void central(int port)
 
   listen(sock, 10);
   printf("listen : %s\n", strerror(errno));
+  
+  return sock;
+}
+
+void central(int port)
+{
+  struct epoll_event ev, events[MAX_EVENTS];
+  int nfds, epollfd;
+  struct sockaddr_in saddr_client;
+  
+  int sock = mk_sock(port);
 
   epollfd = epoll_create(10);
   if (epollfd == -1) {
@@ -167,7 +175,11 @@ void central(int port)
       }
     }
   }
-}  
+}
+
+//void tcp_pull(int sock, char * file)
+//{
+  
 
 int main(int argc, char ** argv)
 {
