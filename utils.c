@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
@@ -74,16 +75,51 @@ Content-Length: ");
 void file_to_buffer(char * nomFic, char ** buff, int * size)
 {
   /*Ouverture du fichier*/
-  FILE * f = fopen(nomFic, "r");
-  printf("fopen : %s\n", strerror(errno));
+  int fd;
+  FILE * f;
+  struct epoll_event ev, events[MAX_EVENTS];
+  int nfds, epollfd;    
+   
+  fd = open(nomFic, O_RDONLY);
+  if (fd == -1)
+    perror("open");
+  
+  if (fd == -1 && errno == EINPROGRESS)
+  {
+    printf("fd: %d\n", fd);
+
+    epollfd = epoll_create(10);
+    if (epollfd == -1) {
+      perror("epoll_create");
+      exit(EXIT_FAILURE);
+    }
+    
+    ev.events = EPOLLOUT;
+    ev.data.fd = fd;
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == -1) {
+      perror("epoll_ctl: fd");
+      exit(EXIT_FAILURE);
+    }
+    
+    nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
+    puts("working ...");
+    if (nfds == -1) {
+      perror("epoll_pwait");
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  f = fdopen(fd, "r");
+  if (f == NULL)
+    perror("fdopen");
 
   /*Deplacement du curseur à la fin du fichier*/
-  fseek(f, 0,SEEK_END);
-  printf("fseek : %s\n", strerror(errno));
+  if (fseek(f, 0,SEEK_END) == -1)
+    perror("fseek");
 
   /*On recupere le nombre de caractere*/
-  *size = ftell(f);
-  printf("fopen : %s\n", strerror(errno));
+  if ((*size = ftell(f)) == -1)
+    perror("ftell");
 
   int c;
   int i;
@@ -91,8 +127,8 @@ void file_to_buffer(char * nomFic, char ** buff, int * size)
   *buff = malloc(*size * sizeof(char));
 
   /*On se replace au debut du fichier*/
-  fseek(f, 0, SEEK_SET);
-  printf("fseek : %s\n", strerror(errno));
+  if (fseek(f, 0, SEEK_SET) == -1)
+    perror("fseek");
 
   /*On recupere tout les caracteres*/
   for(i = 0; i < *size; i++)
