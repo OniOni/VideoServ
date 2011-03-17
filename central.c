@@ -12,6 +12,53 @@
 
 #include "central.h"
 
+enum protocol {TCP_PULL, TCP_PUSH, UDP_PULL, UDP_PUSH};
+
+struct action
+{
+  int port;
+  enum protocol proto;
+  char * file;
+};
+  
+
+enum protocol conv_proto(char * proto)
+{
+  enum protocol ret;
+  if (strcmp("TCP_PULL", proto) == 0)
+    ret = TCP_PULL;
+  else if (strcmp("TCP_PUSH", proto) == 0)
+    ret = TCP_PUSH;
+  else if (strcmp("UDP_PULL", proto) == 0)
+    ret = UDP_PULL;
+  else if (strcmp("UDP_PUSH", proto) == 0)
+    ret = UDP_PUSH;
+
+  return ret;
+}
+
+void parse_catalogue(char * catalogue, struct action * acts, int * len)
+{
+  FILE * f = fopen(catalogue, "r");
+
+  int id, port;
+  char * name, * type, * add, * protocol, * ips;
+
+  len = 0;
+
+  //TODO : Write code to jump two first lines
+
+  while (fscanf(f, "Object ID=%d name=%s type=%s address=%s port=%d protocol=%s ips=%s\r\n",
+		&id, name, type, add, &port, protocol, ips) != EOF)
+    {
+      *len += 1;
+      acts = (struct action*)malloc(*len * sizeof(struct action));
+      acts[*len -1].port = port;
+      acts[*len -1].proto = conv_proto(protocol);
+      acts[*len -1].file = name;
+    }
+}
+
 void send_get_answer(int fd)
 {
   int size;
