@@ -18,6 +18,16 @@ struct tcp_info{
   int start;
 };
 
+void init_tcp_info(struct tcp_info * tab[], int len)
+{
+  int i = 0;
+  for(i = 0; i < len; i++)
+  {
+    (*tab)[i].num_image = 0;
+    (*tab)[i].data_socket = -1;
+    (*tab)[i].start = 0;
+  }
+}
 
 void read_init(int sock, int * id, int * port_c)
 {
@@ -184,7 +194,9 @@ void tcp_pull(int port, char * file)
   int nfds, epollfd;
   struct sockaddr_in saddr_client;
 
-  struct tcp_info connected_clients[1024] = {0, 0, 0};
+  struct tcp_info connected_clients[1024];
+  
+  //init_tcp_info((struct tcp_info**)&connected_clients, 1024);
 
   epollfd = epoll_create(10);
   if (epollfd == -1) {
