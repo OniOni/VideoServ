@@ -142,12 +142,15 @@ void read_get(int sock, int * id)
 int send_image(int sock, int image)
 {
   int len, sent;
-  char str[12], *buff;
+  char str[12], *buff_image;
   sprintf(str, "%d.jpg", image);
-  file_to_buffer(str, &buff, &len);
+  file_to_buffer(str, &buff_image, &len);
   sent = len;
+  
+  char buff[len + 20];
 
-  puts(buff);
+  sprintf(buff, "%d\r\n%d\r\n%s", image, len, buff);
+
   puts("Going to send image\n");
   do{
     sent -= send(sock, buff, len, 0);
@@ -165,7 +168,6 @@ void tcp_pull(int port, char * file)
   struct epoll_event ev, events[MAX_EVENTS];
   int nfds, epollfd;
   struct sockaddr_in saddr_client;
-  
 
   epollfd = epoll_create(10);
   if (epollfd == -1) {
@@ -213,14 +215,18 @@ void tcp_pull(int port, char * file)
 	printf("%d\n", events[n].events == 1);
 	if (events[n].events == 1)
 	{
+	  
 	  struct sockaddr_in addr;
 	  int id, len;
-	  read_init(events[n].data.fd, &id, &c_port);
-	  printf("%d::%d\n", id, c_port);
-	  getsockname(events[n].data.fd, (struct sockaddr*)&addr, &len); 
-	  int data_sock = connect_to(inet_ntoa(addr.sin_addr), c_port);
+	  if (connected_clients[events[n].data.fd == sock][1] = 0)
+	  {
+	    read_init(events[n].data.fd, &id, &c_port);
+	    printf("Port %d::%d\n", id, c_port);
+	    getsockname(events[n].data.fd, (struct sockaddr*)&addr, &len);
+	    int data_sock = connect_to(inet_ntoa(addr.sin_addr), c_port);
+
 	  read_get(events[n].data.fd, &id);
-	  printf("%d\n", id);
+	  printf("image %d\n", id);
 
 	  send_image(data_sock, id);
 	}

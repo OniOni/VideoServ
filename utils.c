@@ -53,7 +53,7 @@ char * build_http_header(char * type, int size)
   /*Insertion de la date actuelle*/
   strcat(header, build_date());
 
-  strcat(header, "\nServer: ServLib (Unix) (Ubuntu/Linux)\nAccept-Ranges: bytes\n\
+  strcat(header, "\r\nServer: ServLib (Unix) (Ubuntu/Linux)\r\nAccept-Ranges: bytes\r\n\
 Content-Length: ");
 
   /*Insertion de la taille*/
@@ -61,12 +61,12 @@ Content-Length: ");
   sprintf(tmp, "%d", size);
   strcat(header, tmp);
 
-  strcat(header, "\nConnection: close\nContent-Type: ");
+  strcat(header, "\r\nConnection: close\r\nContent-Type: ");
 
   /*Insertion du type*/
   strcat(header, type);
 
-  strcat(header, "; charset=UTF-8\n\n");
+  strcat(header, "; charset=UTF-8\r\n\r\n");
 
   return header;
 }

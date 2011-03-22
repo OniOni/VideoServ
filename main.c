@@ -8,7 +8,7 @@ int main(int argc, char ** argv)
 {
   pid_t p_central = fork();
   if (p_central == 0)
-    central(8082);
+    central(8080);
     
   pid_t p_tcp_pull = fork();
   if (p_tcp_pull == 0)
