@@ -149,12 +149,15 @@ void read_get(int sock, int * id)
 int send_image(int sock, int image)
 {
   int len, sent;
-  char str[12], *buff;
+  char str[12], *buff_ima;
   sprintf(str, "%d.jpg", image);
-  file_to_buffer(str, &buff, &len);
+  file_to_buffer(str, &buff_ima, &len);
   sent = len;
 
-  puts(buff);
+  char buff[len + 20];
+
+  sprintf(buff, "%d\r\n%d\r\n%s", image, len, buff_ima);
+
   puts("Going to send image\n");
   do{
     sent -= send(sock, buff, len, 0);
