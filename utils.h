@@ -13,10 +13,4 @@ void file_to_buffer(char * nomFic, char ** buff, int * size);
 
 int connect_to(char * addr, int c_port);
 
-struct tcp_info{
-  int num_image;
-  int data_socket;
-  int start;
-}
-
 #endif
