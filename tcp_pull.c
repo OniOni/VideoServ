@@ -35,6 +35,7 @@ void read_init(int sock, int * id, int * port_c)
   char buff, buff_pre;
   char * get = "GET ", * end = "END ";
 
+
   *id = 0;
   *port_c = 0;
 
@@ -144,7 +145,7 @@ void read_get(int sock, int * id)
       {
 	//*id = (*id * 10) + atoi(&buff); 	
 	sprintf(buff_num, "%s%c", buff_num, buff);
-	//puts(buff_num);
+	puts(buff_num);
       }
     }
 
@@ -163,7 +164,7 @@ void read_get(int sock, int * id)
 
 int send_image_tcp(int sock, int image)
 {
-  int len, sent;
+  int len, len_buff, sent;
   char str[12], *buff_ima;
   sprintf(str, "%d.jpg", image);
   file_to_buffer(str, &buff_ima, &len);
@@ -176,14 +177,20 @@ int send_image_tcp(int sock, int image)
   
   fclose(f);
 
-  sprintf(buff, "%d\r\n%d\r\n%s", image, len, buff_ima);
-  perror("sprintf");
+  sprintf(buff, "%d\r\n%d\r\n", image, len);
+  //perror("sprintf");
 
 
-  sent = len  = strlen(buff);
-  puts("Going to send image\n");
+  sent = len_buff = strlen(buff);
+  printf("Going to send image %d\n", image);
   do{
-    sent -= send(sock, buff, len, 0);
+    sent -= send(sock, buff, len_buff, 0);
+  }
+  while(sent > 0);
+
+  sent = len;
+  do{
+    sent -= send(sock, buff_ima, len, 0);
   }
   while(sent > 0);
 }
@@ -200,6 +207,10 @@ void tcp_pull(int port, char * file)
   struct sockaddr_in saddr_client;
 
   struct tcp_info connected_clients[1024];
+
+  //TODO : Write get_nombre_image
+
+  int nombre_image = 6;
   
   //init_tcp_info((struct tcp_info**)&connected_clients, 1024);
 
@@ -246,7 +257,7 @@ void tcp_pull(int port, char * file)
 	}
       }
       else{
-	printf("%d\n", events[n].events == 1);
+	printf("envent type %d\n", events[n].events);
 	if (events[n].events == 1)
 	{
 	  struct sockaddr_in addr;
@@ -265,19 +276,24 @@ void tcp_pull(int port, char * file)
 	  else
 	  {
 	    int id = 0;
+	    printf("Getting image number\n");
 	    read_get(events[n].data.fd, &id);
 	    printf("Image number %d\n", id);
 	    if (id > 0)
-	    {
+	    {	      
+	      id = (id % nombre_image) + 1;
+	      printf("id %d\n", id);
 	      send_image_tcp(connected_clients[events[n].data.fd].data_socket, id);
-	      connected_clients[events[n].data.fd].num_image += 1;
+	      connected_clients[events[n].data.fd].num_image = id;
 	    }
 	    else if (id == -1)
 	    {
-	      send_image_tcp(connected_clients[events[n].data.fd].data_socket, 
-			 connected_clients[events[n].data.fd].num_image + 1);
-	      connected_clients[events[n].data.fd].num_image += 1;
+	      id = connected_clients[events[n].data.fd].num_image + 1;
+	      id = (id % nombre_image) + 1;
+	      send_image_tcp(connected_clients[events[n].data.fd].data_socket, id);
+	      connected_clients[events[n].data.fd].num_image = id;
 	    }
+	    printf("Sent image %d\n", connected_clients[events[n].data.fd].num_image);
 	  }
 	}
       }
