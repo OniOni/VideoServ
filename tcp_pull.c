@@ -114,7 +114,7 @@ void read_init(int sock, int * id, int * port_c)
 
 void read_get(int sock, int * id)
 {
-  int i, fini = 0;
+  int i, fini = 0, end = 0;
   char buff, buff_pre, buff_num[32] = {'\0'};
   char * get = "GET ";
 
@@ -126,6 +126,14 @@ void read_get(int sock, int * id)
     while(recv(sock, &buff, 1, 0) != 1);
     if (buff == ' ')
       fini = 1;
+    else if (buff == 'E' || buff == 'e')
+      end = 1;
+  }
+  
+  if (end)
+  {
+    *id = -42;
+    return;
   }
   
   /*for(i = 0; i < 4; i++)
@@ -281,7 +289,7 @@ void tcp_pull(int port, char * file)
 	    printf("Image number %d\n", id);
 	    if (id > 0)
 	    {	      
-	      id = (id % nombre_image) + 1;
+	      id = (id % nombre_image);
 	      printf("id %d\n", id);
 	      send_image_tcp(connected_clients[events[n].data.fd].data_socket, id);
 	      connected_clients[events[n].data.fd].num_image = id;
@@ -289,9 +297,15 @@ void tcp_pull(int port, char * file)
 	    else if (id == -1)
 	    {
 	      id = connected_clients[events[n].data.fd].num_image + 1;
-	      id = (id % nombre_image) + 1;
+	      id = (id % (nombre_image + 1));
+	      if (id == 0) id = 1;
+	      printf("id %d\n", id);
 	      send_image_tcp(connected_clients[events[n].data.fd].data_socket, id);
 	      connected_clients[events[n].data.fd].num_image = id;
+	    }
+	    else if (id == -42)
+	    {
+	      //do closing stuff here
 	    }
 	    printf("Sent image %d\n", connected_clients[events[n].data.fd].num_image);
 	  }
