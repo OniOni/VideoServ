@@ -114,7 +114,7 @@ void read_init(int sock, int * id, int * port_c)
 void read_get(int sock, int * id)
 {
   int i, fini = 0;
-  char buff, buff_pre;
+  char buff, buff_pre, buff_num[32] = {'\0'};
   char * get = "GET ";
 
   *id = 0;
@@ -141,9 +141,14 @@ void read_get(int sock, int * id)
       if (buff == ' ' || buff == '\n' || buff == '\r')
 	fini = 1;
       else
-	*id = (*id * 10) + atoi(&buff); 	
+      {
+	//*id = (*id * 10) + atoi(&buff); 	
+	sprintf(buff_num, "%s%c", buff_num, buff);
+	//puts(buff_num);
+      }
     }
 
+  *id = atoi(buff_num);
 
   int nb_nl = 0;
   while(nb_nl < 2)
