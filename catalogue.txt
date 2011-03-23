@@ -1,0 +1,4 @@
+ServerAddress: 127.0.0.1
+ServerPort: 8080
+Object ID=1 name=Super type=jpeg address=127.0.0.1 port=8083 protocol=TCP_PULL ips=1 
+
