@@ -114,24 +114,49 @@ void read_init(int sock, int * id, int * port_c)
 
 void read_get(int sock, int * id)
 {
-  int i, fini = 0, end = 0;
+  int i = 0, fini = 0, b_end = 1;
   char buff, buff_pre, buff_num[32] = {'\0'};
-  char * get = "GET ";
+  char * get = "GET ", * end = "END ";
 
   *id = 0;
 
-  while(!fini)
+  while (!fini)
   {
     do{}
     while(recv(sock, &buff, 1, 0) != 1);
-    if (buff == ' ')
+
+    if (buff == ' ' || buff == 'E' || buff == 'G')
       fini = 1;
-    else if (buff == 'E' || buff == 'e')
-      end = 1;
+
+    if (buff == 'E' || buff == 'G')
+    {
+      i = 1;
+      putchar(buff);
+    }
   }
+
+  fini = 0;
+  while (!fini)
+  {   
+    do{}
+    while(recv(sock, &buff, 1, 0) != 1);
+      
+    if (buff == ' ' || buff == '\n' || buff == '\r')
+      fini = 1;
+
+    printf("::%c(%d)", buff, i);
+
+    if (i < 3 && buff != end[i])
+      b_end = 0;
+
+    i++;
+  }
+
+  printf("\n\nend : %d\n", b_end);
   
-  if (end)
+  if (b_end)
   {
+    puts("received end");
     *id = -42;
     return;
   }
@@ -306,6 +331,11 @@ void tcp_pull(int port, char * file)
 	    else if (id == -42)
 	    {
 	      //do closing stuff here
+	      close(connected_clients[events[n].data.fd].data_socket);
+	      close(events[n].data.fd);
+	      connected_clients[events[n].data.fd].data_socket = 0;
+	      connected_clients[events[n].data.fd].num_image = 0;
+	      puts("closed connection");
 	    }
 	    printf("Sent image %d\n", connected_clients[events[n].data.fd].num_image);
 	  }
