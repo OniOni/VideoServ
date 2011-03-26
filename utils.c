@@ -11,9 +11,9 @@
 
 #include "utils.h"
 
-void prepare_sock(int port, char * addr, int * sock, struct sockaddr_in * saddr)
+void prepare_sock(int port, char * addr, int * sock, struct sockaddr_in * saddr, int flags)
 {
-  *sock = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+  *sock = socket(AF_INET, flags, 0);
   printf("socket : %s\n", strerror(errno));
   
   saddr->sin_addr.s_addr = inet_addr(addr);
@@ -22,12 +22,12 @@ void prepare_sock(int port, char * addr, int * sock, struct sockaddr_in * saddr)
 }
 
 
-int mk_sock(int port, char * addr)
+int mk_sock(int port, char * addr, int flags)
 {
   int sock;
   struct sockaddr_in saddr;
 
-  prepare_sock(port, addr, &sock, &saddr);
+  prepare_sock(port, addr, &sock, &saddr, flags);
 
   bind(sock, (struct sockaddr *)&saddr, sizeof(saddr));
   printf("bind : %s\n", strerror(errno));
