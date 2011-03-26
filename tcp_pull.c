@@ -9,6 +9,7 @@
 
 #include "serv.h"
 #include "utils.h"
+#include "net_utils.h"
 
 #include "tcp_pull.h"
 
@@ -44,14 +45,14 @@ void read_init(int sock, int * id, int * port_c)
     do{}
     while(recv(sock, &buff, 1, 0) != 1);
       
-    printf(":%c", buff);
+    //printf(":%c", buff);
     if (buff != get[i])
       b_get = 0;
     if (buff != end[i])
       b_end = 0;
   }
 
-  printf("get : %d  end : %d\n", b_get, b_end);
+  //printf("get : %d  end : %d\n", b_get, b_end);
 
   if(b_get)
   {
@@ -66,14 +67,6 @@ void read_init(int sock, int * id, int * port_c)
 	*id = (*id * 10) + atoi(&buff); 	
     }
     printf("id %d\n", *id);
-    
-    /*fini = 0;
-      for(i = 0; i < 12; i++)
-      {
-      recv(sock, &buff, 1, 0);
-      if (buff != listen_port[i])
-      cont = 0;
-      }*/
     
     fini = 0;
     while(!fini)
@@ -112,88 +105,7 @@ void read_init(int sock, int * id, int * port_c)
   }
 }
 
-void read_get(int sock, int * id)
-{
-  int i = 0, fini = 0, b_end = 1;
-  char buff, buff_pre, buff_num[32] = {'\0'};
-  char * get = "GET ", * end = "END ";
 
-  *id = 0;
-
-  while (!fini)
-  {
-    do{}
-    while(recv(sock, &buff, 1, 0) != 1);
-
-    if (buff == ' ' || buff == 'E' || buff == 'G')
-      fini = 1;
-
-    if (buff == 'E' || buff == 'G')
-    {
-      i = 1;
-      putchar(buff);
-    }
-  }
-
-  fini = 0;
-  while (!fini)
-  {   
-    do{}
-    while(recv(sock, &buff, 1, 0) != 1);
-      
-    if (buff == ' ' || buff == '\n' || buff == '\r')
-      fini = 1;
-
-    printf("::%c(%d)", buff, i);
-
-    if (i < 3 && buff != end[i])
-      b_end = 0;
-
-    i++;
-  }
-
-  printf("\n\nend : %d\n", b_end);
-  
-  if (b_end)
-  {
-    puts("received end");
-    *id = -42;
-    return;
-  }
-  
-  /*for(i = 0; i < 4; i++)
-  {
-    recv(sock, &buff, 1, 0);
-    if (buff != get[i])
-      cont = 0;
-      }*/
-  fini = 0;
-  while(!fini)
-    {
-      do{}
-      while(recv(sock, &buff, 1, 0) != 1);
-      if (buff == ' ' || buff == '\n' || buff == '\r')
-	fini = 1;
-      else
-      {
-	//*id = (*id * 10) + atoi(&buff); 	
-	sprintf(buff_num, "%s%c", buff_num, buff);
-	puts(buff_num);
-      }
-    }
-
-  *id = atoi(buff_num);
-
-  int nb_nl = 0;
-  while(nb_nl < 2)
-  {
-    do{}
-    while(recv(sock, &buff, 1, 0) != 1);
-    
-    if (buff == '\n')
-      nb_nl++;
-  }
-}
 
 int send_image_tcp(int sock, int image)
 {
