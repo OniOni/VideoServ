@@ -21,13 +21,24 @@ void prepare_sock(int port, char * addr, int * sock, struct sockaddr_in * saddr,
   saddr->sin_port = htons(port);
 }
 
+int mk_sock_udp(int port, char * addr)
+{
+  int sock;
+  struct sockaddr_in saddr;
+
+  prepare_sock(port, addr, &sock, &saddr, SOCK_DGRAM | SOCK_NONBLOCK);
+
+  bind(sock, (struct sockaddr *)&saddr, sizeof(saddr));
+  perror("bind");
+
+  return sock;
+}
+
 
 int mk_sock(int port, char * addr, int flags)
 {
   int sock;
   struct sockaddr_in saddr;
-
-  printf("protocol: %d\n", SOCK_STREAM | SOCK_NONBLOCK == flags);
 
   prepare_sock(port, addr, &sock, &saddr, flags);
 
