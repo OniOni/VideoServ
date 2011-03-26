@@ -232,7 +232,7 @@ int send_image_tcp(int sock, int image)
 
 void tcp_pull(int port, char * file)
 {
-  int sock = mk_sock(port, "127.0.0.1");
+  int sock = mk_sock(port, "127.0.0.1", SOCK_STREAM | SOCK_NONBLOCK);
 
   int id, c_port;
   struct epoll_event ev, events[MAX_EVENTS];
@@ -303,7 +303,7 @@ void tcp_pull(int port, char * file)
 	    printf("%d::%d\n", id, c_port);
 	    getsockname(events[n].data.fd, (struct sockaddr*)&addr, &len); 
 	    connected_clients[events[n].data.fd].data_socket = 
-	      connect_to(inet_ntoa(addr.sin_addr), c_port);
+	      connect_to(inet_ntoa(addr.sin_addr), c_port, SOCK_STREAM | SOCK_NONBLOCK);
 	    connected_clients[events[n].data.fd].num_image = 0;
 	  }
 	  else

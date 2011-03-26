@@ -14,7 +14,7 @@
 void prepare_sock(int port, char * addr, int * sock, struct sockaddr_in * saddr, int flags)
 {
   *sock = socket(AF_INET, flags, 0);
-  printf("socket : %s\n", strerror(errno));
+  perror("socket");
   
   saddr->sin_addr.s_addr = inet_addr(addr);
   saddr->sin_family = AF_INET;
@@ -26,6 +26,8 @@ int mk_sock(int port, char * addr, int flags)
 {
   int sock;
   struct sockaddr_in saddr;
+
+  printf("protocol: %d\n", SOCK_STREAM | SOCK_NONBLOCK == flags);
 
   prepare_sock(port, addr, &sock, &saddr, flags);
 
@@ -106,11 +108,11 @@ void file_to_buffer(char * nomFic, char ** buff, int * size)
 }
 
 
-int connect_to(char * addr, int c_port)
+int connect_to(char * addr, int c_port, int proto)
 {
   int sock;
   struct sockaddr_in saddr;
-  prepare_sock(c_port, addr, &sock, &saddr);
+  prepare_sock(c_port, addr, &sock, &saddr, proto);
 
   connect(sock, (struct sockaddr*)&saddr, sizeof(saddr));
   
