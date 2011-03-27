@@ -26,7 +26,7 @@ int mk_sock_udp(int port, char * addr)
   int sock;
   struct sockaddr_in saddr;
 
-  prepare_sock(port, addr, &sock, &saddr, SOCK_DGRAM | SOCK_NONBLOCK);
+  prepare_sock(port, addr, &sock, &saddr, SOCK_DGRAM);
 
   bind(sock, (struct sockaddr *)&saddr, sizeof(saddr));
   perror("bind udp");
