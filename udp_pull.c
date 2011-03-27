@@ -6,6 +6,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/epoll.h>
+#include <glib.h>
 
 #include "serv.h"
 #include "utils.h"
@@ -19,6 +20,11 @@ struct udp_info{
   int data_socket;
   int start;
 };
+
+GHFunc print_key_value(gpointer key, gpointer value, gpointer u_data)
+{
+  printf("%s:%s\n", (char*)key, (char*)value);
+}
 
 int get_fragment(char image[], int len, int start, int end, char ** frag)
 {
@@ -40,91 +46,43 @@ int get_fragment(char image[], int len, int start, int end, char ** frag)
 
 void read_init_udp(int sock, int * id, int * port_c, int * frag_size)
 {
-  int i, fini = 0, b_get = 1, b_end = 1;
-  char buff, buff_pre;
+  int i, fini = 0, b_get = 1, b_end = 1, len;
+  char buff[512], buff_pre;
   char * get = "GET ", * end = "END ";
-
+  struct sockaddr_in addr;
 
   *id = 0;
   *port_c = 0;
+  *frag_size = 0;
 
-  for(i = 0; i < 4; i++)
-  {
-    do{}
-    while(recv(sock, &buff, 1, 0) != 1);
-      
-    //printf(":%c", buff);
-    if (buff != get[i])
-      b_get = 0;
-    if (buff != end[i])
-      b_end = 0;
-  }
-
-  //printf("get : %d  end : %d\n", b_get, b_end);
-
-  if(b_get)
-  {
-    //receive ID
-    fini = 0;
-    while(!fini)
-    {
-      do{}
-      while(recv(sock, &buff, 1, 0) != 1);
-      if (buff == ' ' || buff == '\n' || buff == '\r')
-	fini = 1;
-      else
-	*id = (*id * 10) + atoi(&buff); 	
-    }
-    printf("id %d\n", *id);
-    
-    fini = 0;
-    while(!fini)
-    {
-      do{}
-      while(recv(sock, &buff, 1, 0) != 1);
-      if (buff == ' ')
-	fini = 1;
-    }
-    puts("espace\n");
+  recvfrom(sock, buff, 512, 0, (struct sockaddr*)&addr, &len);
+  perror("recvfrom");
   
-    //Receive listening port
-    fini = 0;
-    while(!fini)
-    {
-      do{}
-      while(recv(sock, &buff, 1, 0) != 1);
-      if (buff == ' ' || buff == '\n' || buff == '\r')
-	fini = 1;
-      else
-	*port_c = (*port_c * 10) + atoi(&buff); 	
-    }
-    printf("port : %d\n", *port_c);
+  sscanf(buff, "GET %d\r\nLISTEN_PORT %d\r\nFRAGMENT_SIZE %d\r\n", 
+	 id, port_c, frag_size);
+  perror("sscanf");
+  
+  /*printf("Got :%s: from %s::%d\n", buff, inet_ntoa(addr.sin_addr), 
+    htons(addr.sin_port));*/
+}
 
-    fini = 0;
-    while(!fini)
-    {
-      do{}
-      while(recv(sock, &buff, 1, 0) != 1);
-      if (buff == ' ' || buff == '\n' || buff == '\r')
-	fini = 1;
-      else
-	*frag_size = (*frag_size * 10) + atoi(&buff); 	
-    }
-    printf("frag_size : %d\n", *port_c);
-  }
-  else
-  {
-    close(sock);
-  }
-  int nb_nl = 0;
-  while(nb_nl < 2)
-  {
-    do{}
-    while(recv(sock, &buff, 1, 0) != 1);
-    
-    if (buff == '\n')
-      nb_nl++;
-  }
+void read_get_udp(int sock, int * id)
+{
+  int len;
+  char buff[512];
+  struct sockaddr_in addr;
+
+  *id = 0;
+
+  recvfrom(sock, buff, 512, 0, (struct sockaddr*)&addr, &len);
+  perror("recvfrom");
+  
+  sscanf(buff, "GET %d\r\n", 
+	 id);
+  perror("sscanf");
+  
+  /*printf("Got :%s: from %s::%d\n", buff, inet_ntoa(addr.sin_addr), 
+    htons(addr.sin_port));*/
 }
 
 int send_image_udp(int sock, int image, int frag_size)
@@ -171,8 +129,11 @@ int send_image_udp(int sock, int image, int frag_size)
 
 
 
-/*void udp_pull(int port, char * file)
+void udp_pull(int port, char * file)
 {
+  GHashTable * clients = g_hash_table_new(g_str_hash, g_str_equal);
+
+  puts("in udp_pull");
   int sock = mk_sock_udp(port, "127.0.0.1");
 
   int id, c_port;
@@ -186,8 +147,6 @@ int send_image_udp(int sock, int image, int frag_size)
 
   int nombre_image = 6;
   
-  //init_tcp_info((struct tcp_info**)&connected_clients, 1024);
-
   epollfd = epoll_create(10);
   if (epollfd == -1) {
     perror("epoll_create");
@@ -210,13 +169,46 @@ int send_image_udp(int sock, int image, int frag_size)
     }
     int n;
     for (n = 0; n < nfds; ++n) {
+      struct sockaddr_in addr;
+      int len;
+      char buff;
+      
       if (events[n].data.fd == sock) {
+	recvfrom(events[n].data.fd, &buff, 1, MSG_PEEK, (struct sockaddr*)&addr, &len);
+	perror("recvfrom (peek)");
+	printf("Connection de %s :: %d\n", inet_ntoa(addr.sin_addr), 
+	       htons(addr.sin_port));
+	/*putchar(buff);
+	printf("\nClients %d\n", g_hash_table_size(clients));
+	printf("value %s : key %s\n", (char*)g_hash_table_lookup(clients, (gpointer)inet_ntoa(addr.sin_addr)),
+	inet_ntoa(addr.sin_addr));*/
 	
-	    printf("Sent image %d\n", connected_clients[events[n].data.fd].num_image);
-	  }
+	if(g_hash_table_lookup(clients, (gpointer)inet_ntoa(addr.sin_addr)) == NULL)
+	{
+	  int id, port, frag_size;
+	  puts("Initialisation of data_socket");
+	  struct udp_info client_info;
+
+	  read_init_udp(events[n].data.fd, &id, &port, &frag_size);
+	  printf("id : %d, port : %d, frag_size : %d\n", id, port, frag_size);
+	  
+	  //g_hash_table_foreach(clients, (GHFunc)print_key_value, NULL);
+	  /*struct udp_info{
+	    int num_image;
+	    int num_frag;
+	    int frag_size;
+	    int data_socket;
+	    int start;
+	    };*/
+	  g_hash_table_insert(clients, (gpointer)inet_ntoa(addr.sin_addr), (gpointer)"hey");
+	}
+	else
+	{
+	  read_get_udp(events[n].data.fd, &id);
+	  printf("id : %d\n", id);
 	}
       }
     }
   }
-}*/
+}
 
