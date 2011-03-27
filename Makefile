@@ -3,13 +3,13 @@ EDL=gcc
 RM=rm
 BUILDDIR=build/
 SRCDIR=./
-CCFLAGS=
-LDFLAGS=
+CCFLAGS=`pkg-config --cflags --libs glib-2.0`
+LDFLAGS=`pkg-config --cflags --libs glib-2.0`
 RMFLAGS=-f
 EXE=serv.a
 LIBS=
 EFFACE=clean
-OBJ=$(BUILDDIR)tcp_pull.o $(BUILDDIR)udp_pull.o $(BUILDDIR)utils.o $(BUILDDIR)central.o
+OBJ=$(BUILDDIR)tcp_pull.o $(BUILDDIR)udp_pull.o $(BUILDDIR)utils.o $(BUILDDIR)central.o $(BUILDDIR)net_utils.o
 
 $(EXE) : $(OBJ) $(BUILDDIR)main.o
 	$(EDL) $(LDFLAGS) -o $(EXE) $(OBJ) $(LIBS) $(BUILDDIR)main.o
