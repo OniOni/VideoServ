@@ -29,7 +29,7 @@ int mk_sock_udp(int port, char * addr)
   prepare_sock(port, addr, &sock, &saddr, SOCK_DGRAM | SOCK_NONBLOCK);
 
   bind(sock, (struct sockaddr *)&saddr, sizeof(saddr));
-  perror("bind");
+  perror("bind udp");
 
   return sock;
 }
@@ -43,10 +43,10 @@ int mk_sock(int port, char * addr, int flags)
   prepare_sock(port, addr, &sock, &saddr, flags);
 
   bind(sock, (struct sockaddr *)&saddr, sizeof(saddr));
-  printf("bind : %s\n", strerror(errno));
+  perror("bind");
 
   listen(sock, 10);
-  printf("listen : %s\n", strerror(errno));
+  perror("listen");
   
   return sock;
 }
