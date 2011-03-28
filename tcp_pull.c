@@ -129,7 +129,7 @@ int send_image_tcp(int sock, int image)
   sent = len_buff = strlen(buff);
   printf("Going to send image %d\n", image);
   do{
-    sent -= send(sock, buff, len_buff, 0);
+    sent -= send(sock, buff, len_buff, MSG_MORE);
   }
   while(sent > 0);
 
