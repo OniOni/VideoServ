@@ -30,19 +30,22 @@ GHFunc print_key_value(gpointer key, gpointer value, gpointer u_data)
 
 int get_fragment(char image[], int len, int start, int end, char ** frag)
 {
-  int size = end - start, i;
+  int size = end - start, i, last = 0;
   //printf("Size : %d :: start : %d :: Len : %d\n", size, start, len);
   *frag = malloc(size * sizeof(char));
-  int read = 0;
+  int read = 0;  
 
   for (i = 0; i < size; i++)
   {
     if (start + i < len)
     {
       (*frag)[i] = image[start + i];
+      last = start + i;
       read++;
     }
   }
+  
+  //printf("First: %d\tLast: %d\n", start, last);
 
   //printf("Read : %d\n", read);
   return read;
@@ -81,8 +84,7 @@ void read_get_udp(int sock, int * id)
   recvfrom(sock, buff, 512, 0, (struct sockaddr*)&addr, &len);
   perror("recvfrom");
   
-  sscanf(buff, "GET %d\r\n", 
-	 id);
+  sscanf(buff, "GET %d\r\n", id);
   perror("sscanf");
   
   /*printf("Got :%s: from %s::%d\n", buff, inet_ntoa(addr.sin_addr), 
@@ -91,7 +93,7 @@ void read_get_udp(int sock, int * id)
 
 int send_image_udp(int sock, struct sockaddr_in dest, int image, int frag_size)
 {
-  int len_ima, len, sent, read, start = 0, pos_pack = 0;
+  int len_ima, len, sent = 0, read, start = 0, pos_pack = 0;
   char str[12], *buff_ima;
   errno = 0;
   sprintf(str, "%d.jpg", image);
@@ -99,10 +101,10 @@ int send_image_udp(int sock, struct sockaddr_in dest, int image, int frag_size)
 
   file_to_buffer(str, &buff_ima, &len_ima);
   
-  sprintf(str, "dump%d.jpg", image);
+  /*sprintf(str, "dump%d.jpg", image);
   FILE * f = fopen(str, "a");
   fwrite(buff_ima, sizeof(char), len, f);
-  fclose(f);  
+  fclose(f);*/
 
   int num_frag = len_ima / frag_size;
 
@@ -117,17 +119,19 @@ int send_image_udp(int sock, struct sockaddr_in dest, int image, int frag_size)
     read = get_fragment(buff_ima, len_ima, start, start+frag_size, &buff);
     
     //build "header"
-    sprintf(buff, "%d\r\n%d\r\n%d\r\n", image, len_ima, pos_pack, read);
-    //perror("sprintf");
-      
-    sent = len = strlen(buff);
+    sprintf(buff, "%d\r\n%d\r\n%d\r\n%d\r\n", image, len_ima, start, read);
+    //perror("sprintf");    
+
+    //printf("Image :%d Taille :%d Début frag :%d Caractere lu%d Fin :%d\n", image, len_ima, start, read, start + read);
+        
+    len = strlen(buff);
 
     //send "header"
     //puts("Going to send image\n");
 
-    sendto(sock, buff, len, 0, (struct sockaddr*)&dest, sizeof(dest));
+    sendto(sock, buff, len, MSG_MORE, (struct sockaddr*)&dest, sizeof(dest));
     
-    sent = len = len_ima;
+    sent += read;
     //send fragment
     //printf("Sending %d/%d\n", read, frag_size);
     sendto(sock, buff, read, 0, (struct sockaddr*)&dest, sizeof(dest));;      
@@ -137,7 +141,8 @@ int send_image_udp(int sock, struct sockaddr_in dest, int image, int frag_size)
     pos_pack += 1;
   }
   while(pos_pack <= num_frag);
-  
+
+  printf("Sent : %d/%d\t", sent,len_ima);
   puts("Image sent");
 }
 
@@ -183,10 +188,11 @@ void udp_pull(int port, char * file)
     int n;
     for (n = 0; n < nfds; ++n) {
       struct sockaddr_in addr;
-      int len;
+      int len = sizeof(struct sockaddr_in);      
       char buff;
       
       if (events[n].data.fd == sock) {
+	errno = 0;
 	recvfrom(events[n].data.fd, &buff, 1, MSG_PEEK, (struct sockaddr*)&addr, &len);
 	perror("recvfrom (peek)");
 	printf("Connection de %s :: %d\n", inet_ntoa(addr.sin_addr), 
@@ -222,7 +228,7 @@ void udp_pull(int port, char * file)
 
 	  g_hash_table_insert(clients, (gpointer)inet_ntoa(addr.sin_addr), (gpointer)&client_info);
 	}
-	else
+	else if (buff == 'G')
 	{
 	  struct sockaddr_in dest;
 
@@ -232,20 +238,30 @@ void udp_pull(int port, char * file)
 
 	  dest.sin_family = AF_INET;
 	  dest.sin_port = htons(client_info->listen_port);
-	  printf("port :%d::", client_info->listen_port);
+	  //printf("port :%d::", client_info->listen_port);
+	  //inet_aton("127.0.0.1", &(dest.sin_addr));
 	  dest.sin_addr = client_info->ip;
-	  printf("ip :%s\n", inet_ntoa(client_info->ip));
+	  //printf("ip :%s\n", inet_ntoa(client_info->ip));
 	  	  
 	  read_get_udp(events[n].data.fd, &id);
 	  printf("id : %d\n", id);
 
-	  id = client_info->num_image + 1;
-	  id = (id % (nombre_image + 1));
+	  if (id == -1)
+	    id = client_info->num_image + 1;
+
+	  //printf("id : %d\n", id);
+	  id = ((id % nombre_image) + 1);
+	  //printf("id : %d\n", id);
 
 	  send_image_udp(client_info->data_sock, dest, id, client_info->frag_size);
 
 	  client_info->num_image = id;
-	  
+	}
+	else if (buff == 'E')
+	{
+	  puts("Close connection");
+	  recvfrom(events[n].data.fd, &buff, 1, 0, (struct sockaddr*)&addr, &len);
+	  //TODO closing stuff here
 	}
       }
     }
