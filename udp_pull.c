@@ -28,7 +28,7 @@ GHFunc print_key_value(gpointer key, gpointer value, gpointer u_data)
   printf("%s:%s\n", (char*)key, (char*)value);
 }
 
-int get_fragment(char image[], int len, int start, int end, char ** frag)
+int get_fragment(char image[], int len, int start, int end, char ** frag, char ** all)
 {
   int size = end - start, i, last = 0;
   //printf("Size : %d :: start : %d :: Len : %d\n", size, start, len);
@@ -40,6 +40,7 @@ int get_fragment(char image[], int len, int start, int end, char ** frag)
     if (start + i < len)
     {
       (*frag)[i] = image[start + i];
+      (*all)[start + i] = image[start + i];
       last = start + i;
       read++;
     }
@@ -101,22 +102,22 @@ int send_image_udp(int sock, struct sockaddr_in dest, int image, int frag_size)
 
   file_to_buffer(str, &buff_ima, &len_ima);
   
-  /*sprintf(str, "dump%d.jpg", image);
+  sprintf(str, "dump%d.jpg", image);
   FILE * f = fopen(str, "a");
-  fwrite(buff_ima, sizeof(char), len, f);
-  fclose(f);*/
+  fwrite(buff_ima, sizeof(char), len_ima + 20, f);
+  fclose(f);
 
   int num_frag = len_ima / frag_size;
 
   printf("Image size : %d, Number of fragments %d\n", len_ima, num_frag);
 
-  char * buff;
+  char * buff, * buff_fin = malloc((len_ima + 20) * sizeof(char));
 
   pos_pack = 0;
   do
   {
     //get next fragment
-    read = get_fragment(buff_ima, len_ima, start, start+frag_size, &buff);
+    read = get_fragment(buff_ima, len_ima, start, start+frag_size, &buff, &buff_fin);
     
     //build "header"
     sprintf(buff, "%d\r\n%d\r\n%d\r\n%d\r\n", image, len_ima, start, read);
@@ -141,6 +142,10 @@ int send_image_udp(int sock, struct sockaddr_in dest, int image, int frag_size)
     pos_pack += 1;
   }
   while(pos_pack <= num_frag);
+
+  f = fopen("all.jpg", "a");
+  fwrite(buff_fin, sizeof(char), len_ima + 20, f);
+  fclose(f);
 
   printf("Sent : %d/%d\t", sent,len_ima);
   puts("Image sent");
@@ -262,6 +267,13 @@ void udp_pull(int port, char * file)
 	  puts("Close connection");
 	  recvfrom(events[n].data.fd, &buff, 1, 0, (struct sockaddr*)&addr, &len);
 	  //TODO closing stuff here
+	  struct udp_info * client_info = 
+	    (struct udp_info*)g_hash_table_lookup(clients, 
+						  (gpointer)inet_ntoa(addr.sin_addr));
+
+	  close(client_info->data_sock);
+
+	  g_hash_table_remove(clients, inet_ntoa(addr.sin_addr));
 	}
       }
     }
