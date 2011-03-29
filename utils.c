@@ -11,6 +11,18 @@
 
 #include "utils.h"
 
+  int get_nombre_image(char * a_file)
+  {
+    // read in the conf file the number of images in the video 
+    char s[20];
+    sscanf(s,"%d/conf.txt",a_file);
+    FILE * f = fopen(s,"r");
+    if (retour==-1)
+      perror("error: opening of the conf file in the video repo");
+    fscanf(f,"%d", nombre_image);
+    fclose(f);
+  }
+
 void prepare_sock(int port, int addr, int * sock, struct sockaddr_in * saddr, int flags)
 {
   *sock = socket(AF_INET, flags, 0);
