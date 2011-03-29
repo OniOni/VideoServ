@@ -181,7 +181,7 @@ void tcp_pull(int port, char * file)
 	    printf("%d::%d\n", id, c_port);
 	    getsockname(events[n].data.fd, (struct sockaddr*)&addr, &len); 
 	    connected_clients[events[n].data.fd].data_socket = 
-	      connect_to(inet_ntoa(addr.sin_addr), c_port, SOCK_STREAM | SOCK_NONBLOCK);
+	      connect_to(addr.sin_addr.s_addr, c_port, SOCK_STREAM | SOCK_NONBLOCK);
 	    connected_clients[events[n].data.fd].num_image = 0;
 	  }
 	  else
