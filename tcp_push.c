@@ -157,14 +157,14 @@ void read_commande_NB(int sock, char* commande) /* version non bloquante */
     }
 }
 
-void instance_tcp_push(int csock, int dsock)
+void instance_tcp_push(int csock, int dsock, file * rep)
 {
   char commande='0';
   int numImage=1;
 
   read_commande_B(csock, &commande);
   
-  int nombre_image =  get_nombre_image(); 
+  int nombre_image =  get_nombre_image(rep); 
 
   if (commande == 'E')
   {
@@ -242,7 +242,7 @@ void tcp_push(int port, char * file)
     int data_sock = connect_to(addr.sin_addr.s_addr, c_port, SOCK_STREAM);
 
     if(fork() == 0)
-      instance_tcp_push(un_csock, data_sock);
+      instance_tcp_push(un_csock, data_sock, file);
   }
 }
 
