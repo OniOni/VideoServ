@@ -21,8 +21,15 @@ int main(int argc, char ** argv)
   if (p_udp_pull == 0)
     udp_pull(8084, NULL);
 
+  puts("tcp_push");
+  pid_t p_tcp_push = fork();
+  if (p_tcp_push == 0)
+    tcp_push(8086, NULL);
+
   wait(-1);
   wait(-1);
   wait(-1);
+  wait(-1);
+
   return 0;
 }
