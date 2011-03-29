@@ -110,7 +110,7 @@ void read_init(int sock, int * id, int * port_c)
 
 void tcp_pull(int port, char * file)
 {
-  int sock = mk_sock(port, "127.0.0.1", SOCK_STREAM | SOCK_NONBLOCK);
+  int sock = mk_sock(port, INADDR_ANY, SOCK_STREAM | SOCK_NONBLOCK);
 
   int id, c_port;
   struct epoll_event ev, events[MAX_EVENTS];
