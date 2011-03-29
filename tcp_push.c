@@ -162,9 +162,9 @@ void instance_tcp_push(int csock, int dsock)
   int numImage=1;
 
   read_commande_B(csock, &commande);
+ 
+ int nombre_image =  get_nombre_image(); 
 
-  int nombre_image = 6;
-  
   if (commande == 'E')
   {
     close(csock);
@@ -209,7 +209,7 @@ void tcp_push(int port, char * file)
   
   printf("Dans process client\n");
 
-  int sock = mk_sock(port, "127.0.0.1", SOCK_STREAM);
+  int sock = mk_sock(port, INADDR_ANY, SOCK_STREAM);
 
   /* Creation des instances à chaque nouveau client */
   pid_t pid_instances[MAX_FORK];
