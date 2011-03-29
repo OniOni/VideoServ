@@ -102,10 +102,10 @@ int send_image_udp(int sock, struct sockaddr_in dest, int image, int frag_size)
 
   file_to_buffer(str, &buff_ima, &len_ima);
   
-  sprintf(str, "dump%d.jpg", image);
+  /*sprintf(str, "dump%d.jpg", image);
   FILE * f = fopen(str, "a");
   fwrite(buff_ima, sizeof(char), len_ima + 20, f);
-  fclose(f);
+  fclose(f);*/
 
   int num_frag = len_ima / frag_size;
 
@@ -143,7 +143,7 @@ int send_image_udp(int sock, struct sockaddr_in dest, int image, int frag_size)
   }
   while(pos_pack <= num_frag);
 
-  f = fopen("all.jpg", "a");
+  FILE * f = fopen("all.jpg", "a");
   fwrite(buff_fin, sizeof(char), len_ima + 20, f);
   fclose(f);
 
@@ -157,7 +157,7 @@ void udp_pull(int port, char * file)
   GHashTable * clients = g_hash_table_new(g_str_hash, g_str_equal);
 
   puts("in udp_pull");
-  int sock = mk_sock_udp(port, "127.0.0.1");
+  int sock = mk_sock_udp(port, INADDR_ANY);
 
   int id, c_port;
   struct epoll_event ev, events[MAX_EVENTS];
@@ -254,9 +254,8 @@ void udp_pull(int port, char * file)
 	  if (id == -1)
 	    id = client_info->num_image + 1;
 
-	  //printf("id : %d\n", id);
-	  id = ((id % nombre_image) + 1);
-	  //printf("id : %d\n", id);
+	  if (id >= nombre_image)
+	    id = 1;
 
 	  send_image_udp(client_info->data_sock, dest, id, client_info->frag_size);
 
