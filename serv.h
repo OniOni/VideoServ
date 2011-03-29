@@ -6,5 +6,6 @@
 #define MAX_STR 32
 #define MAX_IMAGE 10*1024
 
+int serv_addr;
 
 #endif

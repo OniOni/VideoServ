@@ -11,17 +11,17 @@
 
 #include "utils.h"
 
-void prepare_sock(int port, char * addr, int * sock, struct sockaddr_in * saddr, int flags)
+void prepare_sock(int port, int addr, int * sock, struct sockaddr_in * saddr, int flags)
 {
   *sock = socket(AF_INET, flags, 0);
   perror("socket");
   
-  saddr->sin_addr.s_addr = inet_addr(addr);
+  saddr->sin_addr.s_addr = addr;
   saddr->sin_family = AF_INET;
   saddr->sin_port = htons(port);
 }
 
-int mk_sock_udp(int port, char * addr)
+int mk_sock_udp(int port, int addr)
 {
   int sock;
   struct sockaddr_in saddr;
@@ -35,7 +35,7 @@ int mk_sock_udp(int port, char * addr)
 }
 
 
-int mk_sock(int port, char * addr, int flags)
+int mk_sock(int port, int addr, int flags)
 {
   int sock;
   struct sockaddr_in saddr;
@@ -119,7 +119,7 @@ void file_to_buffer(char * nomFic, char ** buff, int * size)
 }
 
 
-int connect_to(char * addr, int c_port, int proto)
+int connect_to(int addr, int c_port, int proto)
 {
   int sock;
   struct sockaddr_in saddr;
