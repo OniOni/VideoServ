@@ -202,11 +202,19 @@ void instance_tcp_push(int csock, int dsock)
   }
 }
 
+void croqueMitaine()
+{
+	int pidDuMort = waitpid(-1,0,NULL);
+}
 
 void tcp_push(int port, char * file)
 {
-  /* Creation d'un hander de signal */
-  
+    /* Creation d'un hander de signal */
+  struct sigaction instance_decede;
+  finVoie.sa_handler = croqueMitaine;
+  sigemptyset (&instance_decede.sa_mask);
+  finVoie.sa_flags = 0;
+  sigaction(SIGCHLD,instance_decede,NULL);
   printf("Dans process client\n");
 
   int sock = mk_sock(port, INADDR_ANY, SOCK_STREAM);
