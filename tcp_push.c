@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <sys/epoll.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "serv.h"
 #include "utils.h"
@@ -162,8 +163,8 @@ void instance_tcp_push(int csock, int dsock)
   int numImage=1;
 
   read_commande_B(csock, &commande);
- 
- int nombre_image =  get_nombre_image(); 
+  
+  int nombre_image =  get_nombre_image(); 
 
   if (commande == 'E')
   {
@@ -204,17 +205,17 @@ void instance_tcp_push(int csock, int dsock)
 
 void croqueMitaine()
 {
-	int pidDuMort = waitpid(-1,0,NULL);
+  int pidDuMort = waitpid(-1,0,NULL);
 }
 
 void tcp_push(int port, char * file)
 {
-    /* Creation d'un hander de signal */
-  struct sigaction instance_decede;
-  finVoie.sa_handler = croqueMitaine;
+  /* Creation d'un hander de signal */
+  /*struct sigaction instance_decede;
+  instance_decede.sa_handler = croqueMitaine;
   sigemptyset (&instance_decede.sa_mask);
-  finVoie.sa_flags = 0;
-  sigaction(SIGCHLD,instance_decede,NULL);
+  instance_decede.sa_flags = 0;
+  sigaction(SIGCHLD, (const struct sigaction*)&instance_decede, NULL);*/
   printf("Dans process client\n");
 
   int sock = mk_sock(port, INADDR_ANY, SOCK_STREAM);
@@ -238,7 +239,7 @@ void tcp_push(int port, char * file)
     int id, len;
     read_init_tcp_push(un_csock, &id, &c_port);
     getsockname(un_csock, (struct sockaddr*)&addr, &len);
-    int data_sock = connect_to(inet_ntoa(addr.sin_addr), c_port, SOCK_STREAM);
+    int data_sock = connect_to(addr.sin_addr.s_addr, c_port, SOCK_STREAM);
 
     if(fork() == 0)
       instance_tcp_push(un_csock, data_sock);
