@@ -21,11 +21,14 @@ int send_image_tcp(int sock, int image)
   sprintf(str, "%d.jpg", image);
   file_to_buffer(str, &buff_ima, &len);
 
+  printf("Image size : %d\n", len);
+
   char buff[len + 20];
 
   FILE * f = fopen("dump.jpg", "a");
 
-  fwrite(buff_ima, sizeof(char), len, f);
+  int wrote = fwrite(buff_ima, 1, len, f);
+  printf("Wrote : %d\n", wrote);
   
   fclose(f);
 
@@ -41,9 +44,10 @@ int send_image_tcp(int sock, int image)
   while(sent > 0);
 
   sent = len;
-  do{
-    sent -= send(sock, buff_ima, len, 0);
-  }
-  while(sent > 0);
+  //do{
+  sent = send(sock, buff_ima, len, 0);
+    //}
+    //while(sent > 0);
+  printf("Sent : %d\n", sent);
 }
 

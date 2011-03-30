@@ -24,7 +24,7 @@ int main(int argc, char ** argv)
   puts("tcp_push");
   pid_t p_tcp_push = fork();
   if (p_tcp_push == 0)
-    tcp_push(8086, NULL);
+    tcp_push(8086, "super");
 
   wait(-1);
   wait(-1);

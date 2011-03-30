@@ -164,7 +164,7 @@ void instance_tcp_push(int csock, int dsock, char * rep)
 
   read_commande_B(csock, &commande);
   
-  int nombre_image =  get_nombre_image(rep); 
+  int nombre_image = get_nombre_image(rep); 
 
   if (commande == 'E')
   {
