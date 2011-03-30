@@ -197,6 +197,7 @@ void udp_pull(int port, char * file)
       struct sockaddr_in addr;
       int len = sizeof(struct sockaddr_in);      
       char buff;
+      char key[32];
       
       if (events[n].data.fd == sock) {
 	errno = 0;
@@ -209,7 +210,8 @@ void udp_pull(int port, char * file)
 	printf("value %s : key %s\n", (char*)g_hash_table_lookup(clients, (gpointer)inet_ntoa(addr.sin_addr)),
 	inet_ntoa(addr.sin_addr));*/
 	
-	if(g_hash_table_lookup(clients, (gpointer)inet_ntoa(addr.sin_addr)) == NULL)
+	sprintf(key, "%s:%d", inet_ntoa(addr.sin_addr), htons(addr.sin_port));
+	if(g_hash_table_lookup(clients, (gpointer)key) == NULL)
 	{
 	  int id, port, frag_size;
 	  puts("Initialisation of data_socket");
@@ -233,7 +235,7 @@ void udp_pull(int port, char * file)
 	  client_info.ip = addr.sin_addr;
 	  client_info.data_sock = socket(AF_INET, SOCK_DGRAM, 0);
 
-	  g_hash_table_insert(clients, (gpointer)inet_ntoa(addr.sin_addr), (gpointer)&client_info);
+	  g_hash_table_insert(clients, (gpointer)key, (gpointer)&client_info);
 	}
 	else if (buff == 'G')
 	{
@@ -241,7 +243,7 @@ void udp_pull(int port, char * file)
 
 	  struct udp_info * client_info = 
 	    (struct udp_info*)g_hash_table_lookup(clients, 
-						  (gpointer)inet_ntoa(addr.sin_addr));
+						  (gpointer)key);
 
 	  dest.sin_family = AF_INET;
 	  dest.sin_port = htons(client_info->listen_port);
@@ -259,6 +261,7 @@ void udp_pull(int port, char * file)
 	  if (id >= nombre_image)
 	    id = 1;
 
+	  printf("id : %d\n", id);
 	  send_image_udp(client_info->data_sock, dest, id, client_info->frag_size);
 
 	  client_info->num_image = id;
@@ -270,7 +273,7 @@ void udp_pull(int port, char * file)
 	  //TODO closing stuff here
 	  struct udp_info * client_info = 
 	    (struct udp_info*)g_hash_table_lookup(clients, 
-						  (gpointer)inet_ntoa(addr.sin_addr));
+						  (gpointer)key);
 
 	  close(client_info->data_sock);
 
