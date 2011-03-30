@@ -28,27 +28,26 @@ GHFunc print_key_value(gpointer key, gpointer value, gpointer u_data)
   printf("%s:%s\n", (char*)key, (char*)value);
 }
 
-int get_fragment(char image[], int len, int start, int end, char ** frag, char ** all)
+int get_fragment(char image[], int len, int start, int size, char ** frag, char ** all)
 {
-  int size = end - start, i, last = 0;
+  int i = 0, last = 0;
   //printf("Size : %d :: start : %d :: Len : %d\n", size, start, len);
   *frag = malloc(size * sizeof(char));
   int read = 0;  
 
-  for (i = 0; i < size; i++)
-  {
-    if (start + i < len)
-    {
-      (*frag)[i] = image[start + i];
-      (*all)[start + i] = image[start + i];
-      last = start + i;
-      read++;
-    }
+  while ( (i < size) && (start + i < len) )
+  {    
+    (*frag)[i] = image[start + i];
+    (*all)[start + i] = image[start + i];
+    last = start + i;
+    read++;
+    i++;
   }
-  
+   
   //printf("First: %d\tLast: %d\n", start, last);
 
-  //printf("Read : %d\n", read);
+  if (read != size)
+    printf("Read : %d\n", read);
   return read;
 }
 
@@ -76,7 +75,7 @@ void read_init_udp(int sock, int * id, int * port_c, int * frag_size)
 
 void read_get_udp(int sock, int * id)
 {
-  int len;
+  int len = sizeof(struct sockaddr_in);
   char buff[512];
   struct sockaddr_in addr;
 
@@ -95,10 +94,12 @@ void read_get_udp(int sock, int * id)
 int send_image_udp(int sock, struct sockaddr_in dest, int image, int frag_size)
 {
   int len_ima, len, sent = 0, read, start = 0, pos_pack = 0;
-  char str[12], *buff_ima;
+  char str[32], *buff_ima, header[32];
   errno = 0;
   sprintf(str, "%d.jpg", image);
   puts(str);
+
+  frag_size -= 100;
 
   file_to_buffer(str, &buff_ima, &len_ima);
   
@@ -117,37 +118,38 @@ int send_image_udp(int sock, struct sockaddr_in dest, int image, int frag_size)
   do
   {
     //get next fragment
-    read = get_fragment(buff_ima, len_ima, start, start+frag_size, &buff, &buff_fin);
+    read = get_fragment(buff_ima, len_ima, start, frag_size, &buff, &buff_fin);
     
     //build "header"
-    sprintf(buff, "%d\r\n%d\r\n%d\r\n%d\r\n", image, len_ima, start, read);
+    sprintf(header, "%d\r\n%d\r\n%d\r\n%d\r\n", image, len_ima, start, read);
     //perror("sprintf");    
+    puts(str);
 
     //printf("Image :%d Taille :%d Début frag :%d Caractere lu%d Fin :%d\n", image, len_ima, start, read, start + read);
         
-    len = strlen(buff);
+    len = strlen(header);
 
     //send "header"
     //puts("Going to send image\n");
 
-    sendto(sock, buff, len, MSG_MORE, (struct sockaddr*)&dest, sizeof(dest));
+    sendto(sock, header, len, MSG_MORE, (struct sockaddr*)&dest, sizeof(dest));
     
-    sent += read;
+
     //send fragment
     //printf("Sending %d/%d\n", read, frag_size);
-    sendto(sock, buff, read, 0, (struct sockaddr*)&dest, sizeof(dest));;      
+    sent += sendto(sock, buff, read, 0, (struct sockaddr*)&dest, sizeof(dest));;      
 
     //printf("fragment n%d/%d\n", pos_pack, num_frag);
     start += read;
     pos_pack += 1;
   }
-  while(pos_pack <= num_frag);
+  while(sent < len_ima);
 
-  FILE * f = fopen("all.jpg", "a");
+  /*FILE * f = fopen("all.jpg", "a");
   fwrite(buff_fin, sizeof(char), len_ima + 20, f);
-  fclose(f);
+  fclose(f);*/
 
-  printf("Sent : %d/%d\t", sent,len_ima);
+  printf("Sent : %d/%d\t%d fragments of %d\n", sent, len_ima, pos_pack, frag_size);
   puts("Image sent");
 }
 
