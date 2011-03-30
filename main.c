@@ -14,7 +14,7 @@ int main(int argc, char ** argv)
   puts("tcp_pull");    
   pid_t p_tcp_pull = fork();
   if (p_tcp_pull == 0)
-    tcp_pull(8083, NULL);
+    tcp_pull(8083, "super");
 
   puts("udp_pull");
   pid_t p_udp_pull = fork();

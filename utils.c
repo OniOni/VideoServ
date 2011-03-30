@@ -16,7 +16,9 @@ int get_nombre_image(char * a_file)
   // read in the conf file the number of images in the video 
   int nombre_image;
   char s[20];
-  sscanf(s, "%s/conf.txt",a_file);
+  sprintf(s, "%s/.conf",a_file);
+  perror("sprintf");
+
   FILE * f = fopen(s,"r");
   perror("fopen");
 
@@ -103,15 +105,16 @@ void file_to_buffer(char * nomFic, char ** buff, int * size)
 {
   /*Ouverture du fichier*/
   FILE * f = fopen(nomFic, "r");
-  printf("fopen : %s\n", strerror(errno));
+  perror("fopen");
 
   /*Deplacement du curseur à la fin du fichier*/
   fseek(f, 0,SEEK_END);
-  printf("fseek : %s\n", strerror(errno));
+  perror("fseek");
 
   /*On recupere le nombre de caractere*/
   *size = ftell(f);
-  printf("fopen : %s\n", strerror(errno));
+  printf("File size : %d\n", *size);
+  perror("fopen");
 
   int c;
   int i;
@@ -120,7 +123,7 @@ void file_to_buffer(char * nomFic, char ** buff, int * size)
 
   /*On se replace au debut du fichier*/
   fseek(f, 0, SEEK_SET);
-  printf("fseek : %s\n", strerror(errno));
+  perror("fseek");
 
   /*On recupere tout les caracteres*/
   for(i = 0; i < *size; i++)
@@ -131,6 +134,7 @@ void file_to_buffer(char * nomFic, char ** buff, int * size)
 
   /*Et on referme le fichier*/
   fclose(f);
+  perror("fclose");
 }
 
 

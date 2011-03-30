@@ -121,7 +121,7 @@ void tcp_pull(int port, char * file)
 
   //TODO : Write get_nombre_image
 
-  int nombre_image = 6;
+  int nombre_image = get_nombre_image(file);
   
   //init_tcp_info((struct tcp_info**)&connected_clients, 1024);
 
@@ -194,7 +194,7 @@ void tcp_pull(int port, char * file)
 	    {	      
 	      id = (id % nombre_image);
 	      printf("id %d\n", id);
-	      send_image_tcp(connected_clients[events[n].data.fd].data_socket, id);
+	      send_image_tcp(connected_clients[events[n].data.fd].data_socket, id, file);
 	      connected_clients[events[n].data.fd].num_image = id;
 	    }
 	    else if (id == -1)
@@ -203,7 +203,7 @@ void tcp_pull(int port, char * file)
 	      id = (id % (nombre_image + 1));
 	      if (id == 0) id = 1;
 	      printf("id %d\n", id);
-	      send_image_tcp(connected_clients[events[n].data.fd].data_socket, id);
+	      send_image_tcp(connected_clients[events[n].data.fd].data_socket, id, file);
 	      connected_clients[events[n].data.fd].num_image = id;
 	    }
 	    else if (id == -42)

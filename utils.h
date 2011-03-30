@@ -1,6 +1,8 @@
 #ifndef UTILS
 #define UTILS
 
+int get_nombre_image(char * a_file);
+
 void prepare_sock(int port, int addr, int * sock, struct sockaddr_in * saddr, int);
 
 int mk_sock(int port, int addr, int);

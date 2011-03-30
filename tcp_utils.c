@@ -14,11 +14,12 @@
 #include "tcp_utils.h"
 
 
-int send_image_tcp(int sock, int image)
+int send_image_tcp(int sock, int image, char * rep)
 {
   int len, len_buff, sent;
   char str[12], *buff_ima;
-  sprintf(str, "%d.jpg", image);
+  sprintf(str, "%s/%d.jpg", rep, image);
+  puts(str);
   file_to_buffer(str, &buff_ima, &len);
 
   printf("Image size : %d\n", len);
