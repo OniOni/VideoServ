@@ -157,7 +157,7 @@ void read_commande_NB(int sock, char* commande) /* version non bloquante */
     }
 }
 
-void instance_tcp_push(int csock, int dsock, file * rep)
+void instance_tcp_push(int csock, int dsock, char * rep)
 {
   char commande='0';
   int numImage=1;
