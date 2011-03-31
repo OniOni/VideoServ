@@ -171,6 +171,8 @@ void udp_pull(int port, char * file)
 	  close(client_info->data_sock);
 
 	  g_hash_table_remove(clients, inet_ntoa(addr.sin_addr));
+	  free(client_info);
+	  perror("free");
 	}
       }
     }
