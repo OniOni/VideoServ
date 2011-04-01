@@ -19,7 +19,7 @@ int main(int argc, char ** argv)
   puts("udp_pull");
   pid_t p_udp_pull = fork();
   if (p_udp_pull == 0)
-    udp_pull(8084, NULL);
+    udp_pull(8084, "super");
 
   puts("tcp_push");
   pid_t p_tcp_push = fork();
