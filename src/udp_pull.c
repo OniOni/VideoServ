@@ -59,7 +59,7 @@ void udp_pull(int port, char * file)
 
   //TODO : Write get_nombre_image
 
-  int nombre_image = 6;
+  int nombre_image = get_nombre_image(file);
   
   epollfd = epoll_create(10);
   if (epollfd == -1) {
@@ -149,7 +149,7 @@ void udp_pull(int port, char * file)
 	  if (id == -1)
 	    id = client_info->num_image + 1;
 
-	  if (id >= nombre_image)
+	  if (id > nombre_image)
 	    id = 1;
 
 	  printf("id : %d\n", id);
