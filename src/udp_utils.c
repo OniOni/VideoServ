@@ -119,5 +119,12 @@ int send_image_udp(int sock, struct sockaddr_in dest, int image, int frag_size)
 
   //printf("Sent : %d/%d\t%d fragments of %d\n", sent, len_ima, pos_pack, frag_size);
   //puts("Image sent");
+
+  free(buff_ima);
+  perror("free");
+  free(buff);
+  perror("free");
+  free(buff_fin);
+  perror("free");
 }
 
