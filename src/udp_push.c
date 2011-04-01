@@ -40,9 +40,9 @@ void udp_push_client(struct t_udp_push c, char * file, int tempo)
   }
   
   ev.events = EPOLLIN;
-  ev.data.fd = c.pipe[1];
-  if (epoll_ctl(epollfd, EPOLL_CTL_ADD, c.pipe[1], &ev) == -1) {
-    perror("epoll_ctl: pipe[1]");
+  ev.data.fd = c.pipe[0];
+  if (epoll_ctl(epollfd, EPOLL_CTL_ADD, c.pipe[0], &ev) == -1) {
+    perror("epoll_ctl: pipe[0]");
     exit(EXIT_FAILURE);
   }
 
@@ -55,8 +55,8 @@ void udp_push_client(struct t_udp_push c, char * file, int tempo)
     }
     int n;
     for (n = 0; n < nfds; ++n) {
-      if (events[n].data.fd == c.pipe[1]) {
-	read(c.pipe[1], &buff, 1);
+      if (events[n].data.fd == c.pipe[0]) {
+	read(c.pipe[0], &buff, 1);
 	putchar(buff);
 	if (buff == 'S')
 	  c.udp.start = 1;
@@ -64,11 +64,15 @@ void udp_push_client(struct t_udp_push c, char * file, int tempo)
 	  c.udp.start = 0;
       }
     }
-    if (!nfds /*==0*/){	  	  
-      if (c.udp.num_image > nombre_image)
-	c.udp.num_image = 1;
-
-      send_image_udp(c.udp.data_sock, dest, c.udp.num_image, c.udp.frag_size);
+    if (!nfds /*==0*/){	  
+      if (c.udp.start /*==1*/){
+	c.udp.num_image += 1;	  
+	if (c.udp.num_image > nombre_image || c.udp.num_image <= 0)
+	  c.udp.num_image = 1;
+	
+	printf("Going to send image %d\n", c.udp.num_image);
+	send_image_udp(c.udp.data_sock, dest, c.udp.num_image, c.udp.frag_size);
+      }
     }
   }
 }
@@ -152,17 +156,22 @@ void udp_push(int port, char * file)
 	  g_hash_table_insert(clients, (gpointer)key, (gpointer)client_info);
 	  printf("%p\n", client_info);
 
-	  //Fork here
+	  //TODO : Change tempo
+	  if(fork() == 0)
+	    udp_push_client(*client_info, file, 1000);
 	}
 	else if (buff == 'S' || buff == 'P')
 	{
 	  struct sockaddr_in dest;
 
+	  //Clear buffer
+	  recvfrom(events[n].data.fd, &buff, 1, 0, (struct sockaddr*)&addr, &len);
+
 	  struct t_udp_push * client_info = 
 	    (struct t_udp_push*)g_hash_table_lookup(clients, 
 						  (gpointer)key);
 
-	  write(client_info->pipe[0], buff, 1);
+	  write(client_info->pipe[1], &buff, 1);
 	  perror("write");
 	}
 	else if (buff == 'E')
@@ -178,6 +187,10 @@ void udp_push(int port, char * file)
 	  close(client_info->udp.data_sock);
 
 	  g_hash_table_remove(clients, inet_ntoa(addr.sin_addr));
+	}
+	else {
+	  recvfrom(events[n].data.fd, &buff, 1, 0, (struct sockaddr*)&addr, &len);
+	  printf("Received %c\n", buff);
 	}
       }
     }
