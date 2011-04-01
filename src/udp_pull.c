@@ -134,7 +134,7 @@ void udp_pull(int port, char * file)
 	    id = 1;
 
 	  printf("id : %d\n", id);
-	  send_image_udp(client_info->data_sock, dest, id, client_info->frag_size);
+	  send_image_udp(client_info->data_sock, dest, file, id, client_info->frag_size);
 
 	  client_info->num_image = id;
 	  
