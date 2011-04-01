@@ -59,12 +59,12 @@ void read_init_udp(int sock, int * id, int * port_c, int * frag_size)
     htons(addr.sin_port));*/
 }
 
-int send_image_udp(int sock, struct sockaddr_in dest, int image, int frag_size)
+int send_image_udp(int sock, struct sockaddr_in dest, char * rep, int image, int frag_size)
 {
   int len_ima = 0, len, sent = 0, read, start = 0, pos_pack = 0;
   char str[32], *buff_ima, header[32];
   errno = 0;
-  sprintf(str, "%d.jpg", image);
+  sprintf(str, "%s/%d.jpg", rep, image);
   //puts(str);
 
   frag_size -= 100;
