@@ -57,9 +57,13 @@ void udp_push_client(struct t_udp_push c, char * file, int tempo)
     for (n = 0; n < nfds; ++n) {
       if (events[n].data.fd == c.pipe[0]) {
 	read(c.pipe[0], &buff, 1);
-	putchar(buff);
+	putchar(buff); putchar('\n');
 	if (buff == 'S')
 	  c.udp.start = 1;
+	else if (buff == 'Q'){
+	  puts("exitin process");
+	  return; 
+	}
 	else
 	  c.udp.start = 0;
       }
@@ -178,11 +182,14 @@ void udp_push(int port, char * file)
 	{
 	  puts("Close connection");	  
 	  //Clear buffer
-	  recvfrom(events[n].data.fd, &buff, 1, 0, (struct sockaddr*)&addr, &len);
+	  recvfrom(events[n].data.fd, &buff, 1, 0, (struct sockaddr*)&addr, &len);	
 
 	  struct t_udp_push * client_info = 
 	    (struct t_udp_push*)g_hash_table_lookup(clients, 
 						  (gpointer)key);
+
+	  write(client_info->pipe[1], "Q", 1);
+	  perror("write");
 
 	  close(client_info->udp.data_sock);
 
