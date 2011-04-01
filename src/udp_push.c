@@ -60,10 +60,13 @@ void udp_push_client(struct t_udp_push c, char * file, int tempo)
 	putchar(buff); putchar('\n');
 	if (buff == 'S')
 	  c.udp.start = 1;
-	else if (buff == 'Q'){
+	else if (buff == 'E'){
 	  puts("exitin process");
 	  return; 
 	}
+	else if (buff == 'A'){
+	  //TODO : Alive stuff
+c	}
 	else
 	  c.udp.start = 0;
       }
@@ -162,7 +165,7 @@ void udp_push(int port, char * file)
 
 	  //TODO : Change tempo
 	  if(fork() == 0)
-	    udp_push_client(*client_info, file, 1000);
+	    udp_push_client(*client_info, file, 100);
 	}
 	else if (buff == 'S' || buff == 'P')
 	{
@@ -188,7 +191,7 @@ void udp_push(int port, char * file)
 	    (struct t_udp_push*)g_hash_table_lookup(clients, 
 						  (gpointer)key);
 
-	  write(client_info->pipe[1], "Q", 1);
+	  write(client_info->pipe[1], &buff, 1);
 	  perror("write");
 
 	  close(client_info->udp.data_sock);
