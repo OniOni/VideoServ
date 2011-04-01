@@ -66,7 +66,7 @@ void udp_push_client(struct t_udp_push c, char * file, int tempo)
 	}
 	else if (buff == 'A'){
 	  //TODO : Alive stuff
-c	}
+	}
 	else
 	  c.udp.start = 0;
       }
