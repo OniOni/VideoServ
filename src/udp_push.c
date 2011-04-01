@@ -20,11 +20,64 @@ struct t_udp_push{
   int pipe[2];
 };
 
+void udp_push_client(struct t_udp_push c, char * file, int tempo)
+{
+  struct epoll_event ev, events[MAX_EVENTS];
+  int nfds, epollfd;
+  char buff;
+  struct sockaddr_in dest;
+
+  dest.sin_family = AF_INET;
+  dest.sin_port = htons(c.udp.listen_port);
+  dest.sin_addr = c.udp.ip;
+
+  int nombre_image = get_nombre_image(file);
+  
+  epollfd = epoll_create(10);
+  if (epollfd == -1) {
+    perror("epoll_create");
+    exit(EXIT_FAILURE);
+  }
+  
+  ev.events = EPOLLIN;
+  ev.data.fd = c.pipe[1];
+  if (epoll_ctl(epollfd, EPOLL_CTL_ADD, c.pipe[1], &ev) == -1) {
+    perror("epoll_ctl: pipe[1]");
+    exit(EXIT_FAILURE);
+  }
+
+  for (;;) {
+    nfds = epoll_wait(epollfd, events, MAX_EVENTS, tempo);
+    puts("working ...");
+    if (nfds == -1) {
+      perror("epoll_pwait");
+      exit(EXIT_FAILURE);
+    }
+    int n;
+    for (n = 0; n < nfds; ++n) {
+      if (events[n].data.fd == c.pipe[1]) {
+	read(c.pipe[1], &buff, 1);
+	putchar(buff);
+	if (buff == 'S')
+	  c.udp.start = 1;
+	else
+	  c.udp.start = 0;
+      }
+    }
+    if (!nfds /*==0*/){	  	  
+      if (c.udp.num_image > nombre_image)
+	c.udp.num_image = 1;
+
+      send_image_udp(c.udp.data_sock, dest, c.udp.num_image, c.udp.frag_size);
+    }
+  }
+}
+
 void udp_push(int port, char * file)
 {
   GHashTable * clients = g_hash_table_new(g_str_hash, g_str_equal);
 
-  puts("in udp_pull");
+  puts("in udp_push");
   int sock = mk_sock_udp(port, INADDR_ANY);
 
   int id, c_port;
