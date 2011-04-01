@@ -57,8 +57,6 @@ void udp_pull(int port, char * file)
 
   struct udp_info connected_clients[1024];
 
-  //TODO : Write get_nombre_image
-
   int nombre_image = get_nombre_image(file);
   
   epollfd = epoll_create(10);
@@ -94,10 +92,6 @@ void udp_pull(int port, char * file)
 	perror("recvfrom (peek)");
 	printf("Connection de %s :: %d\n", inet_ntoa(addr.sin_addr), 
 	       htons(addr.sin_port));
-	/*putchar(buff);
-	printf("\nClients %d\n", g_hash_table_size(clients));
-	printf("value %s : key %s\n", (char*)g_hash_table_lookup(clients, (gpointer)inet_ntoa(addr.sin_addr)),
-	inet_ntoa(addr.sin_addr));*/
 	
 	sprintf(key, "%s:%d", inet_ntoa(addr.sin_addr), htons(addr.sin_port));
 	if(g_hash_table_lookup(clients, (gpointer)key) == NULL)
@@ -108,16 +102,6 @@ void udp_pull(int port, char * file)
 
 	  read_init_udp(events[n].data.fd, &id, &port, &frag_size);
 	  printf("id : %d, port : %d, frag_size : %d\n", id, port, frag_size);
-	  
-	  //g_hash_table_foreach(clients, (GHFunc)print_key_value, NULL);
-
-	  /*struct udp_info{
-	    int num_image;
-	    int num_frag;
-	    int frag_size;
-	    int data_socket;
-	    int start;
-	    };*/
 
 	  client_info->listen_port = port;
 	  client_info->num_image = 0;
@@ -138,10 +122,7 @@ void udp_pull(int port, char * file)
 
 	  dest.sin_family = AF_INET;
 	  dest.sin_port = htons(client_info->listen_port);
-	  //printf("port :%d::", client_info->listen_port);
-	  //inet_aton("127.0.0.1", &(dest.sin_addr));
 	  dest.sin_addr = client_info->ip;
-	  //printf("ip :%s\n", inet_ntoa(client_info->ip));
 	  	  
 	  read_get_udp(events[n].data.fd, &id);
 	  printf("id : %d\n", id);
@@ -157,13 +138,12 @@ void udp_pull(int port, char * file)
 
 	  client_info->num_image = id;
 	  
-	  //g_hash_table_replace(clients, (gpointer)key, (gpointer)&client_info);
 	}
 	else if (buff == 'E')
 	{
 	  puts("Close connection");
 	  recvfrom(events[n].data.fd, &buff, 1, 0, (struct sockaddr*)&addr, &len);
-	  //TODO closing stuff here
+
 	  struct udp_info * client_info = 
 	    (struct udp_info*)g_hash_table_lookup(clients, 
 						  (gpointer)key);
