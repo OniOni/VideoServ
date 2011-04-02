@@ -26,6 +26,11 @@ int main(int argc, char ** argv)
   if (p_tcp_push == 0)
     tcp_push(8086, "super");
 
+  puts("udp_push");
+  pid_t p_udp_push = fork();
+  if (p_udp_push == 0)
+    udp_push(8087, "super");
+
   wait(-1);
   wait(-1);
   wait(-1);
