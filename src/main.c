@@ -29,8 +29,9 @@ int main(int argc, char ** argv)
   puts("udp_push");
   pid_t p_udp_push = fork();
   if (p_udp_push == 0)
-    udp_push(8087, "super");
+    udp_push(8087, "Doctor");
 
+  wait(-1);
   wait(-1);
   wait(-1);
   wait(-1);
