@@ -78,7 +78,7 @@ void udp_push_client(struct t_udp_push c, char * file, int tempo)
 	  c.udp.num_image = 1;
 	
 	printf("Going to send image %d\n", c.udp.num_image);
-	send_image_udp(c.udp.data_sock, dest, c.udp.num_image, c.udp.frag_size);
+	send_image_udp(c.udp.data_sock, dest, file,c.udp.num_image, c.udp.frag_size);
       }
     }
   }
