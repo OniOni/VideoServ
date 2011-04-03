@@ -180,7 +180,7 @@ void instance_tcp_push(int csock, int dsock, char * rep)
       {
 	printf("Preparing to send image %d\n", numImage);
 	send_image_tcp(dsock, numImage, rep);
-	sleep(1);
+	usleep(40000);
 	printf("Sent image %d\n", numImage);
 	read_commande_NB(csock, &commande);
 	printf("Commande %c\n", commande);

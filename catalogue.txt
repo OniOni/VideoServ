@@ -1,7 +1,7 @@
 ServerAddress: 192.168.0.12
 ServerPort: 8080
-Object ID=1 name=SuperTL type=jpeg address=192.168.0.12 port=8083 protocol=TCP_PULL ips=1 
-Object ID=1 name=SuperUL type=jpeg address=192.168.0.12 port=8084 protocol=UDP_PULL ips=1 
-Object ID=1 name=SuperTH type=jpeg address=192.168.0.12 port=8086 protocol=TCP_PUSH ips=1 
-Object ID=1 name=SuperUH type=jpeg address=192.168.0.12 port=8087 protocol=UDP_PUSH ips=1 
-Object ID=1 name=SuperM type=jpeg address=224.100.100.100 port=2001 protocol=MCAST_PUSH ips=1 
+Object ID=1 name=SuperTL type=jpeg address=127.0.0.1 port=8083 protocol=TCP_PULL ips=25
+Object ID=1 name=SuperUL type=jpeg address=127.0.0.1 port=8084 protocol=UDP_PULL ips=5
+Object ID=1 name=SuperTH type=jpeg address=127.0.0.1 port=8086 protocol=TCP_PUSH ips=25 
+Object ID=1 name=SuperUH type=jpeg address=127.0.0.1 port=8087 protocol=UDP_PUSH ips=20 
+Object ID=1 name=SuperM type=jpeg address=224.100.100.100 port=2001 protocol=MCAST_PUSH ips=25 
