@@ -238,7 +238,7 @@ void tcp_push(int port, char * file)
     struct sockaddr_in addr;
     int id, len;
     read_init_tcp_push(un_csock, &id, &c_port);
-    getsockname(un_csock, (struct sockaddr*)&addr, &len);
+    getpeername(un_csock, (struct sockaddr*)&addr, &len);
     int data_sock = connect_to(addr.sin_addr.s_addr, c_port, SOCK_STREAM);
 
     if(fork() == 0)
