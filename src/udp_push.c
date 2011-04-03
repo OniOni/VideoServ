@@ -57,7 +57,7 @@ void udp_push_client(struct t_udp_push c, char * file, int tempo)
     for (n = 0; n < nfds; ++n) {
       if (events[n].data.fd == c.pipe[0]) {
 	read(c.pipe[0], &buff, 1);
-	putchar(buff); putchar('\n');
+	printf("Command %c\n", buff);
 	if (buff == 'S')
 	  c.udp.start = 1;
 	else if (buff == 'E'){
@@ -98,10 +98,6 @@ void udp_push(int port, char * file)
 
   struct udp_info connected_clients[1024];
 
-  //TODO : Write get_nombre_image
-
-  int nombre_image = 6;
-  
   epollfd = epoll_create(10);
   if (epollfd == -1) {
     perror("epoll_create");
