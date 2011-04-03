@@ -179,7 +179,7 @@ void tcp_pull(int port, char * file)
 	    puts("Initialisation of data_socket");
 	    read_init(events[n].data.fd, &id, &c_port);
 	    printf("%d::%d\n", id, c_port);
-	    getsockname(events[n].data.fd, (struct sockaddr*)&addr, &len); 
+	    getpeername(events[n].data.fd, (struct sockaddr*)&addr, &len); 
 	    connected_clients[events[n].data.fd].data_socket = 
 	      connect_to(addr.sin_addr.s_addr, c_port, SOCK_STREAM | SOCK_NONBLOCK);
 	    connected_clients[events[n].data.fd].num_image = 0;
