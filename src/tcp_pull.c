@@ -110,7 +110,7 @@ void read_init(int sock, int * id, int * port_c)
 
 void tcp_pull(int port, char * file)
 {
-  int sock = mk_sock(port, INADDR_ANY, SOCK_STREAM | SOCK_NONBLOCK);
+  int sock = mk_sock(port, INADDR_ANY, SOCK_STREAM);
 
   int id, c_port;
   struct epoll_event ev, events[MAX_EVENTS];
@@ -179,9 +179,11 @@ void tcp_pull(int port, char * file)
 	    puts("Initialisation of data_socket");
 	    read_init(events[n].data.fd, &id, &c_port);
 	    printf("%d::%d\n", id, c_port);
-	    getpeername(events[n].data.fd, (struct sockaddr*)&addr, &len); 
+	    getpeername(events[n].data.fd, (struct sockaddr*)&addr, &len);
+	    printf("Connection de %s :: %d\n", inet_ntoa(addr.sin_addr), 
+	       htons(addr.sin_port));
 	    connected_clients[events[n].data.fd].data_socket = 
-	      connect_to(addr.sin_addr.s_addr, c_port, SOCK_STREAM | SOCK_NONBLOCK);
+	      connect_to(addr.sin_addr.s_addr, c_port, SOCK_STREAM);
 	    connected_clients[events[n].data.fd].num_image = 0;
 	  }
 	  else

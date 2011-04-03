@@ -34,7 +34,7 @@ int main(int argc, char ** argv)
   puts("Multicast");
   pid_t p_multi = fork();
   if (p_multi == 0)
-    multicast(2001, "Doctor", 100);
+  multicast(2001, "Doctor", 1000000);
 
   wait(-1);
   wait(-1);
