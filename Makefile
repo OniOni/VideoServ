@@ -9,7 +9,7 @@ RMFLAGS=-f
 EXE=serv.a
 LIBS=
 EFFACE=clean
-OBJ=$(BUILDDIR)tcp_pull.o $(BUILDDIR)udp_pull.o $(BUILDDIR)utils.o $(BUILDDIR)central.o $(BUILDDIR)net_utils.o $(BUILDDIR)tcp_push.o $(BUILDDIR)tcp_utils.o $(BUILDDIR)udp_utils.o $(BUILDDIR)udp_push.o
+OBJ=$(BUILDDIR)tcp_pull.o $(BUILDDIR)udp_pull.o $(BUILDDIR)utils.o $(BUILDDIR)central.o $(BUILDDIR)net_utils.o $(BUILDDIR)tcp_push.o $(BUILDDIR)tcp_utils.o $(BUILDDIR)udp_utils.o $(BUILDDIR)udp_push.o $(BUILDDIR)multicast.o
 
 $(EXE) : $(OBJ) $(BUILDDIR)main.o
 	$(EDL) $(LDFLAGS) -o $(EXE) $(OBJ) $(LIBS) $(BUILDDIR)main.o
