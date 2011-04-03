@@ -17,15 +17,15 @@
 int send_image_tcp(int sock, int image, char * rep)
 {
   int len, len_buff, sent;
-  char str[12], *buff_ima;
+  char str[32], *buff_ima;
   sprintf(str, "%s/%d.jpg", rep, image);
-  //puts(str);
+
   file_to_buffer(str, &buff_ima, &len);
   errno = 0;
 
   printf("Image size : %d\n", len);
 
-  char buff[len + 20];
+  char buff[100];
 
   /*FILE * f = fopen("dump.jpg", "a");
 
@@ -48,7 +48,7 @@ int send_image_tcp(int sock, int image, char * rep)
   sent = len;
   //do{
   sent = send(sock, buff_ima, len, 0);
-    //}
+  //}
     //while(sent > 0);
   printf("Sent : %d\n", sent);
 
