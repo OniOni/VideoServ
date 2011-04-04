@@ -76,7 +76,7 @@ void central(int port)
   int nfds, epollfd;
   struct sockaddr_in saddr_client;
   
-  int sock = mk_sock(port, INADDR_ANY, SOCK_STREAM | SOCK_NONBLOCK);
+  int sock = mk_sock(port, INADDR_ANY, SOCK_STREAM);
   
   epollfd = epoll_create(10);
   if (epollfd == -1) {
